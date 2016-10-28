@@ -3,12 +3,12 @@ const {app, Menu, Tray, shell, dialog} = require('electron')
 const path = require('path')
 const command = require('shelljs/global')
 
-const jquery = require('jquery')
 const fs = require('fs')
 
 const notifier = require('node-notifier');
 const jsonfile = require('jsonfile')
 
+const terminalTab = require('terminal-tab');
 const trayActive = 'assets/trayIcon.png'
 
 let tray = null
@@ -29,6 +29,7 @@ app.on('ready', () =>
         if (err) throw err
         var jsonData = JSON.parse(data)
         for(var index in jsonData) {
+          //check status!
           box.push({
             'name': jsonData[index].name,
             'path': jsonData[index].path,
@@ -45,6 +46,7 @@ app.on('ready', () =>
     tray.setImage(path.join(__dirname, trayActive))
 
     details(function(box){
+      var on = 0
       var menu = [
         {
           label: "Refresh",
@@ -57,6 +59,9 @@ app.on('ready', () =>
           type: "separator"
         }]
       for(var index in box){
+        if(box[index]["status"] == true){ //status tray number
+          on = on+1
+        }
         var status = box[index]["status"] ? 'Started' : 'Stoped'
         menu.push({
           label: box[index]['name'],
@@ -70,14 +75,16 @@ app.on('ready', () =>
               sublabel: index,
               click: function(menuItem) {
                 var port = 300+menuItem.sublabel
-								runShell(contextMenu, menuItem, "rails server", port)
-                notifier.notify({
-                  'title': '[RAILSMANAGER]',
-                  'subtitle': box[index-1]['name']+ ' is Started!',
-                  'message': 'RailsManager start server in port: '+box[index-1]['port'],
-                  sound: true,
-                  timeout: 3
-                });
+                command('cd '+box[index]["path"]+' && rails s -p '+port, 'h', menuItem, function(){
+                  notifier.notify({
+                    'title': '[RAILSMANAGER]',
+                    'subtitle': box[index]['name']+ ' is Started!',
+                    'message': 'RailsManager start server in port: '+box[index]['port'],
+                    sound: true,
+                    timeout: 3
+                  });
+                })
+
 							}
 
             },
@@ -87,15 +94,25 @@ app.on('ready', () =>
               enabled: box[index]['status'],
               sublabel: index,
               click: function(menuItem) {
-								runShell(contextMenu, menuItem, "kill -9 `cat tmp/pids/server.pid` && clear")
-                notifier.notify({
-                  'title': '[RAILSMANAGER]',
-                  'subtitle': box[index-1]['name']+ ' is Stoped!',
-                  'message': 'RailsManager stop server in port: '+box[index-1]['port'],
-                  sound: true,
-                  timeout: 3
-                });
+                command('cd '+box[index]["path"]+' && kill -9 `cat tmp/pids/server.pid` && killall Terminal', 't', menuItem, function(){
+                  notifier.notify({
+                    'title': '[RAILSMANAGER]',
+                    'subtitle': box[index]['name']+ ' is Stoped!',
+                    'message': 'RailsManager stop server in port: '+box[index]['port'],
+                    sound: true,
+                    timeout: 3
+                  });
+                })
 
+
+							}
+
+            },
+            {
+              label: 'Server Console',
+              id: box[index]['path'],
+              click: function(menuItem) {
+                terminalTab.open('cd '+box[index]["path"]+' && rails c', "t");
 							}
 
             },
@@ -116,7 +133,7 @@ app.on('ready', () =>
               label: 'Open Terminal',
               id: box[index]['path'],
               click: function(menuItem) {
-								runShell(contextMenu, menuItem, "open -a 'Terminal.app' "+box[index]['path'])
+                terminalTab.open('cd '+box[index]["path"]+' && clear', "t");
 							}
 
             },
@@ -216,45 +233,22 @@ app.on('ready', () =>
       tray.setToolTip('Rails Manager')
       tray.setContextMenu(contextMenu)
       //console.log(contextMenu)
-
+      if(on > 0){
+        tray.setTitle(on.toString())
+      }
     })
 
   }
 
-  let runShell = function(contextMenu, menuItem, command, port= false)
-	{
+  var command = function(cmd, type, menuItem, callback){
+    setStatus(menuItem.sublabel, function(stat){
+      terminalTab.open(cmd, type, function(){
+        railsManager()
+        return callback()
+      });
 
-		//tray.setImage(path.join(__dirname, trayWait))
-		//contextMenu.items[0].enabled = false
-    menuItem.enabled = false
-		tray.setContextMenu(contextMenu)
-    var puerto = ''
-    if(port != false){
-      puerto = ' -p '+port
-    }
-    console.log(menuItem.sublabel)
-    if(menuItem.sublabel != ''){
-      setStatus(menuItem.sublabel, function(stat){
-        if(stat){
-          let shellCommand = new exec('cd ' + menuItem.id + ' && '+ command + puerto, function(code, stdout, stderr)
-      		{
-      			// console.log('Exit code:', code)
-      			// console.log('Program output:', stdout)
-      			// console.log('Program stderr:', stderr)
-            //leemos archivo json
-            //si esta activo false pasamos a true el status
-            //editConfig('status', 'switch')
-              railsManager()
-      		})
-          railsManager()
-        }
-      })
-    }else{
-      railsManager()
-    }
-
-
-	}
+    })
+  }
   var setStatus = function(index, callback){
     getProjectsJson(function(obj){
       obj[index].status = !obj[index].status
@@ -294,6 +288,7 @@ app.on('ready', () =>
       }
       if(action){
         var port = last_port+1
+        //check if status is on
         obj.push({
           "name": name,
           "path": path,
@@ -389,6 +384,10 @@ app.on('ready', () =>
   installRailsManager(function(stat){
     railsManager()
   })
+
+
+
+
 
 
 

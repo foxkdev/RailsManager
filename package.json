@@ -1,11 +1,19 @@
 {
-  "name": "your-app",
+  "name": "RailsManager",
   "version": "0.1.0",
   "main": "index.js",
   "dependencies": {
-    "jquery": "^3.1.1",
     "jsonfile": "^2.4.0",
     "node-notifier": "^4.6.1",
-    "shelljs": "^0.7.4"
+    "shelljs": "^0.7.4",
+    "terminal-tab": "^0.0.4"
+  },
+  "devDependencies": {
+    "electron-packager": "^8.1.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager ./ RailsManager darwin --out ./build --version 1.4.4 --overwrite --icon=./assets/rm.icns"
+
   }
 }
