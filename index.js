@@ -14,10 +14,10 @@ const trayActive = 'assets/trayIcon.png'
 let tray = null
 
 
-
-
+app.dock.hide()
 app.on('ready', () =>
 {
+
   tray = new Tray(path.join(__dirname, trayActive))
 
   var details = function(callback){

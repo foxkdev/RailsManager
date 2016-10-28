@@ -2,6 +2,10 @@
   "name": "RailsManager",
   "version": "0.1.0",
   "main": "index.js",
+  "window": {
+        "show": false,
+        "show_in_taskbar": false
+    },
   "dependencies": {
     "jsonfile": "^2.4.0",
     "node-notifier": "^4.6.1",
