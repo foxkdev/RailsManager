@@ -2,7 +2,7 @@
 
 > Version: 0.1.0 - 1/11/2016
 
-Rails Manager es un gestor de proyectos para Ruby on Rails desarrollado para facilitar el uso de servidores y debug de aplicaciones Ruby on Rails.
+Rails Manager es un gestor de proyectos para Ruby on Rails desarrollado para facilitar el uso de servidores y debug de aplicaciones Ruby on Rails. RailsManager es de codigo abierto.
 
 Rails Manager se basa en Aplicacion Toolbar para Mac OSX desarollado en Node.js y Electron.atom.io.
 Incluye las siguientes funciones:
