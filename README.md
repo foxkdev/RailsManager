@@ -25,7 +25,7 @@ Rails Manager no es el gestor oficial de Ruby on Rails y no esta desarrollado po
 
 > Rails Manager esta solo disponible para Mac OSX.
 
-Descargar y copiar en Aplicaciones la [Ultima Version](https://github.com/kloppzRailsManager/tree/master/build).
+Descargar y copiar en Aplicaciones la [Ultima Version](https://github.com/kloppz/RailsManager/releases).
 
 ### Requisitos
 >Ruby (cualquier version)
